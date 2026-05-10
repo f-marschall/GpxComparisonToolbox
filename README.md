@@ -2,7 +2,7 @@
 
 Simple SPA to load GPX files in the browser and display them on a map.
 
-This project is published at https://github.com/f-marschall/GpxComparisonToolbox.
+This project is published at https://f-marschall.github.io/GpxComparisonToolbox/.
 
 Quick start
 

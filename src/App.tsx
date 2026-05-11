@@ -146,7 +146,8 @@ export default function App() {
 
       setTracks((prev) => {
         const kept = clearOldDiffs(prev)
-        return [...kept, diff1, diff2]
+        const hiddenOriginals = kept.map((track) => ({ ...track, visible: false }))
+        return [...hiddenOriginals, diff1, diff2]
       })
     } finally {
       setIsCalculatingDiff(false)
@@ -156,6 +157,12 @@ export default function App() {
   const removeTrack = async (id: string) => {
     setTracks((t) => t.filter((x) => x.id !== id))
     await deleteGpxFile(id)
+  }
+
+  const removeAllTracks = async () => {
+    const idsToDelete = tracks.filter(t => !t.isDiff).map(t => t.id)
+    setTracks((t) => t.filter((x) => x.isDiff))
+    await Promise.all(idsToDelete.map(id => deleteGpxFile(id)))
   }
 
   const visibleTracks = useMemo(() => tracks.filter((track) => track.visible), [tracks])
@@ -181,6 +188,7 @@ export default function App() {
             onRemove={(id: string) => void removeTrack(id)}
             onZoomTrack={(id: string) => mapControlsRef.current?.zoomToTrack?.(id)}
             onZoomAll={() => mapControlsRef.current?.zoomToAll?.()}
+            onRemoveAll={() => void removeAllTracks()}
             onRequestDiff={(threshold) => void requestDiff(threshold)}
             isWorking={isCalculatingDiff}
           />

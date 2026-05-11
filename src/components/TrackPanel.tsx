@@ -19,6 +19,7 @@ export default function TrackPanel({
   onRemove,
   onZoomTrack,
   onZoomAll,
+  onRemoveAll,
   onRequestDiff
   ,isWorking
 }: {
@@ -28,10 +29,12 @@ export default function TrackPanel({
   onRemove: (id: string) => void
   onZoomTrack: (id: string) => void
   onZoomAll: () => void
+  onRemoveAll?: () => void
   onRequestDiff?: (thresholdMeters: number) => void
   isWorking?: boolean
 }) {
   const [threshold, setThreshold] = React.useState(50)
+  const maxTrackNameChars = 48
   const totalDistance = visibleTracks.reduce((sum, track) => sum + track.stats.distance_km, 0)
   const longestTrack = visibleTracks.reduce<TrackInfo | null>((best, track) => {
     if (!best || track.stats.distance_km > best.stats.distance_km) return track
@@ -43,6 +46,7 @@ export default function TrackPanel({
       <h2 id="tracks-heading" style={{ marginTop: 0 }}>Tracks ({tracks.length})</h2>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
         <button onClick={onZoomAll} disabled={visibleTracks.length === 0}>Zoom all</button>
+        <button onClick={() => onRemoveAll?.()} disabled={tracks.length === 0}>Remove all</button>
       </div>
       {visibleTracks.length > 1 && (
         <div className="compare-card" aria-label="Visible track comparison summary">
@@ -104,7 +108,9 @@ export default function TrackPanel({
             <div className="track-head">
               <div className="track-title">
                 <div aria-hidden="true" style={{ width: 12, height: 12, borderRadius: 999, background: t.color, flex: '0 0 auto' }} />
-                <strong>{t.name}</strong>
+                <strong title={t.name}>
+                  {t.name.length > maxTrackNameChars ? `${t.name.slice(0, maxTrackNameChars - 1)}...` : t.name}
+                </strong>
               </div>
               <div className="track-actions">
                 <button onClick={() => onZoomTrack(t.id)} disabled={!t.visible}>Zoom</button>

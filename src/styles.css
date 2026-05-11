@@ -153,6 +153,8 @@ button:focus-visible, input:focus-visible {
 .track-card,
 .compare-card {
 	padding: 0.9rem;
+	min-width: 0;
+	overflow: hidden;
 }
 
 .track-head {
@@ -160,6 +162,8 @@ button:focus-visible, input:focus-visible {
 	justify-content: space-between;
 	align-items: flex-start;
 	gap: 0.75rem;
+	min-width: 0;
+	flex-wrap: wrap;
 }
 
 .track-title {
@@ -167,10 +171,14 @@ button:focus-visible, input:focus-visible {
 	align-items: center;
 	gap: 0.65rem;
 	min-width: 0;
+	flex: 1 1 16rem;
 }
 
 .track-title strong {
 	display: block;
+	min-width: 0;
+	max-width: 100%;
+	flex: 1 1 auto;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -180,6 +188,7 @@ button:focus-visible, input:focus-visible {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.5rem;
+	flex: 0 0 auto;
 	justify-content: flex-end;
 }
 
@@ -326,6 +335,11 @@ button:focus-visible, input:focus-visible {
 	.sidebar {
 		padding-left: 0.85rem;
 		padding-right: 0.85rem;
+	}
+
+	.track-actions {
+		width: 100%;
+		justify-content: flex-start;
 	}
 
 	.compare-grid {

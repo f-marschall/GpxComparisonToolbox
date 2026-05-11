@@ -4,6 +4,7 @@ import MapView from './components/MapView'
 import TrackPanel from './components/TrackPanel'
 import { gpx as parseGpx } from '@mapbox/togeojson'
 import { computeStats } from './utils/geo'
+import { diffGpx } from './utils/diff'
 import { deleteGpxFile, getStoredGpxFiles, saveGpxFile } from './utils/gpxStore'
 
 type Track = {
@@ -13,6 +14,7 @@ type Track = {
   geojson: any
   visible: boolean
   color: string
+  isDiff?: boolean
   stats: ReturnType<typeof computeStats>
 }
 
@@ -24,6 +26,7 @@ function pickColor(i: number) {
 
 export default function App() {
   const [tracks, setTracks] = useState<Track[]>([])
+  const [isCalculatingDiff, setIsCalculatingDiff] = useState(false)
   const [isLoadingStoredFiles, setIsLoadingStoredFiles] = useState(true)
   const mapControlsRef = useRef<any>({})
 
@@ -99,6 +102,57 @@ export default function App() {
     setTracks((t) => t.map(x => x.id === id ? { ...x, visible: !x.visible } : x))
   }
 
+  const clearOldDiffs = (list: Track[]) => list.filter((t) => !(t.id.includes('-diff-to-')))
+
+  const requestDiff = async (thresholdMeters: number) => {
+    const base = tracks.filter((t) => !t.id.includes('-diff-to-') && t.geojson)
+    if (base.length < 2) {
+      alert('Please load and show at least two tracks to compare')
+      return
+    }
+
+    // allow UI to update before heavy computation
+    setIsCalculatingDiff(true)
+    await new Promise((r) => setTimeout(r, 0))
+
+    try {
+      const a = base[0]
+      const b = base[1]
+
+      const diffAB = diffGpx(a.geojson, b.geojson, thresholdMeters)
+      const diffBA = diffGpx(b.geojson, a.geojson, thresholdMeters)
+
+      const diff1: Track = {
+        id: `${a.id}-diff-to-${b.id}`,
+        name: `${a.name} → ${b.name} differences`,
+        content: '',
+        geojson: diffAB,
+        visible: true,
+        color: '#d00055',
+        isDiff: true,
+        stats: computeStats(diffAB)
+      }
+
+      const diff2: Track = {
+        id: `${b.id}-diff-to-${a.id}`,
+        name: `${b.name} → ${a.name} differences`,
+        content: '',
+        geojson: diffBA,
+        visible: true,
+        color: '#ff6600',
+        isDiff: true,
+        stats: computeStats(diffBA)
+      }
+
+      setTracks((prev) => {
+        const kept = clearOldDiffs(prev)
+        return [...kept, diff1, diff2]
+      })
+    } finally {
+      setIsCalculatingDiff(false)
+    }
+  }
+
   const removeTrack = async (id: string) => {
     setTracks((t) => t.filter((x) => x.id !== id))
     await deleteGpxFile(id)
@@ -127,6 +181,8 @@ export default function App() {
             onRemove={(id: string) => void removeTrack(id)}
             onZoomTrack={(id: string) => mapControlsRef.current?.zoomToTrack?.(id)}
             onZoomAll={() => mapControlsRef.current?.zoomToAll?.()}
+            onRequestDiff={(threshold) => void requestDiff(threshold)}
+            isWorking={isCalculatingDiff}
           />
         </aside>
         <section className="map">

@@ -1,6 +1,6 @@
 type GeoJSON = any
 
-function haversine(a: [number, number], b: [number, number]) {
+export function haversine(a: [number, number], b: [number, number]) {
   const toRad = (deg: number) => (deg * Math.PI) / 180
   const lat1 = toRad(a[1])
   const lon1 = toRad(a[0])

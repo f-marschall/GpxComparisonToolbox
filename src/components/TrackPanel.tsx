@@ -18,7 +18,9 @@ export default function TrackPanel({
   onToggleVisibility,
   onRemove,
   onZoomTrack,
-  onZoomAll
+  onZoomAll,
+  onRequestDiff
+  ,isWorking
 }: {
   tracks: TrackInfo[]
   visibleTracks: TrackInfo[]
@@ -26,7 +28,10 @@ export default function TrackPanel({
   onRemove: (id: string) => void
   onZoomTrack: (id: string) => void
   onZoomAll: () => void
+  onRequestDiff?: (thresholdMeters: number) => void
+  isWorking?: boolean
 }) {
+  const [threshold, setThreshold] = React.useState(50)
   const totalDistance = visibleTracks.reduce((sum, track) => sum + track.stats.distance_km, 0)
   const longestTrack = visibleTracks.reduce<TrackInfo | null>((best, track) => {
     if (!best || track.stats.distance_km > best.stats.distance_km) return track
@@ -67,6 +72,22 @@ export default function TrackPanel({
             <div className="compare-metric">
               <span className="compare-label">Comparison mode</span>
               <span className="compare-value">Side-by-side</span>
+            </div>
+            <div className="compare-metric compare-metric--wide">
+              <span className="compare-label">Diff threshold (m)</span>
+              <span className="compare-value">
+                <input type="number" value={threshold} onChange={(e) => setThreshold(Number(e.target.value || 0))} style={{ width: 80 }} />
+                <button style={{ marginLeft: 8 }} onClick={() => onRequestDiff?.(threshold)} disabled={!onRequestDiff || isWorking}>
+                  {isWorking ? (
+                    <>
+                      <span className="spinner" aria-hidden style={{ marginRight: 8 }} />
+                      Calculating…
+                    </>
+                  ) : (
+                    'Show diffs'
+                  )}
+                </button>
+              </span>
             </div>
           </div>
         </div>

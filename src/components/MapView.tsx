@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import L from 'leaflet'
 
-type Track = { id: string; name: string; geojson: any; visible: boolean; color: string }
+type Track = { id: string; name: string; geojson: any; visible: boolean; color: string; isDiff?: boolean }
 
 type Props = { tracks: Track[]; onReady?: (controls: any) => void }
 
@@ -73,7 +73,8 @@ export default function MapView({ tracks, onReady }: Props) {
 
     // add/update tracks
     for (const t of tracks) {
-      const layer = L.geoJSON(t.geojson as any, { style: { color: t.color, weight: 3 } })
+      const style = { color: t.color, weight: t.isDiff ? 4 : 3, dashArray: t.isDiff ? '6 6' : undefined }
+      const layer = L.geoJSON(t.geojson as any, { style })
       if (layersRef.current[t.id]) {
         mapRef.current.removeLayer(layersRef.current[t.id])
       } else {

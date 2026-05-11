@@ -172,7 +172,7 @@ export default function App() {
       <header className="topbar">
         <div className="brand">
           <h1>GPX Comparison Toolbox</h1>
-          <p>Load multiple GPX files in the browser and compare them side by side.</p>
+          <p>Load multiple GPX files in the browser and compare them side by side. Everything runs locally in your browser, and no track data is shared.</p>
         </div>
         <div className="file-count" aria-live="polite">
           {tracks.length === 0 ? 'No tracks loaded yet' : `${tracks.length} track${tracks.length === 1 ? '' : 's'} loaded`}
